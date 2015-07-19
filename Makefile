@@ -20,6 +20,8 @@ RANLIB = true
 
 RM      = rm -f
 
+DESTDIR=/usr
+PREFIX=/local
 
 # Implicit rules
 
@@ -34,6 +36,8 @@ COMPILE.c=$(CC) $(CFLAGS) -c
 SRCS = src/iniparser.c \
 	   src/dictionary.c
 
+HEADERS = src/iniparser.h src/dictionary.h
+
 OBJS = $(SRCS:.c=.o)
 
 
@@ -46,6 +50,16 @@ libiniparser.a:	$(OBJS)
 libiniparser.so:	$(OBJS)
 	@$(SHLD) $(LDSHFLAGS) -o $@.0 $(OBJS) $(LDFLAGS) \
 		-Wl,-soname=`basename $@`.0
+
+.PHONY:	install
+install:	libiniparser.a libiniparser.so.0
+	@echo "[Install Headers]"
+	@install -m 0755 -d						$(DESTDIR)$(PREFIX)/include
+	@install -m 0644 $(HEADERS)					$(DESTDIR)$(PREFIX)/include
+	@echo "[Install Dynamic Lib]"
+	@install -m 0755 -d						$(DESTDIR)$(PREFIX)/lib
+	@install -m 0755 libiniparser.so.0		$(DESTDIR)$(PREFIX)/lib/libiniparser.so
+	@ldconfig
 
 clean:
 	$(RM) $(OBJS)
